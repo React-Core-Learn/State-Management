@@ -1,52 +1,25 @@
-type State = Record<string, any>
-type ObserverFn<T> = (...args: T[]) => void
+import { observable, observe } from './core/observer.ts'
 
-interface InitialState {
-  a: number
-  b: number
-}
+const state = observable({ a: 10, b: 20 })
 
-function observable<TState extends State = State>(initialState: TState) {
-  Object.keys(initialState).forEach((key) => {
-    let _value = initialState[key]
-    const observers = new Set() as Set<ObserverFn<TState>>
+const rootElement = document.getElementById('app')! as HTMLDivElement
 
-    Object.defineProperty(initialState, key, {
-      get() {
-        if (currentObserver) {
-          observers.add(currentObserver)
-        }
+const render = () => {
+  rootElement.innerHTML = `
+    <p>a + b = ${state.a + state.b}</p>
+    <input id="stateA" value="${state.a}" />
+    <input id="stateB" value="${state.b}" />
+  `
 
-        return _value
-      },
-      set(value) {
-        _value = value
-        observers.forEach((observer) => observer())
-      },
-    })
+  rootElement.querySelector('#stateA')!.addEventListener('change', (event) => {
+    const target = event.target as HTMLInputElement
+    state.a = Number(target.value)
   })
 
-  return initialState
+  rootElement.querySelector('#stateB')!.addEventListener('change', (event) => {
+    const target = event.target as HTMLInputElement
+    state.b = Number(target.value)
+  })
 }
 
-let currentObserver: null | (() => void) = null
-
-function observer(fn: () => void) {
-  currentObserver = fn
-  fn()
-  currentObserver = null
-}
-
-// a를 읽을 때 a가 observers에 등록해야함.
-
-const store = observable<InitialState>({ a: 10, b: 20 })
-
-observer(() => console.log(`a = ${store.a}`))
-observer(() => console.log(`b = ${store.b}`))
-observer(() => console.log(`a + b = ${store.a} + ${store.b}`))
-observer(() => console.log(`a * b = ${store.a} + ${store.b}`))
-observer(() => console.log(`a - b = ${store.a} + ${store.b}`))
-
-store.a = 100
-
-store.b = 200
+observe(render)
