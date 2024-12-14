@@ -1,6 +1,7 @@
-import { observable, observe } from './core/observer.ts'
+import { observe } from './core/observer.ts'
+import { store } from './store.ts'
 
-const state = observable({ a: 10, b: 20 })
+const { state, setState } = store({ a: 10, b: 20 })
 
 const rootElement = document.getElementById('app')! as HTMLDivElement
 
@@ -13,12 +14,12 @@ const render = () => {
 
   rootElement.querySelector('#stateA')!.addEventListener('change', (event) => {
     const target = event.target as HTMLInputElement
-    state.a = Number(target.value)
+    setState({ a: Number(target.value) })
   })
 
   rootElement.querySelector('#stateB')!.addEventListener('change', (event) => {
     const target = event.target as HTMLInputElement
-    state.b = Number(target.value)
+    setState({ b: Number(target.value) })
   })
 }
 
