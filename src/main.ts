@@ -1,26 +1,26 @@
-import { observe } from './core/observer.ts'
-import { store } from './store.ts'
+import { createStore } from './core/redux'
+import { additionReducer, ACTION_TYPE } from './reducer'
 
-const { state, setState } = store({ a: 10, b: 20 })
+const { getState, dispatch, subscribe } = createStore(additionReducer)
 
 const rootElement = document.getElementById('app')! as HTMLDivElement
 
 const render = () => {
   rootElement.innerHTML = `
-    <p>a + b = ${state.a + state.b}</p>
-    <input id="stateA" value="${state.a}" />
-    <input id="stateB" value="${state.b}" />
+    <p>a + b = ${getState().a + getState().b}</p>
+    <input id="stateA" value="${getState().a}" />
+    <input id="stateB" value="${getState().b}" />
   `
 
   rootElement.querySelector('#stateA')!.addEventListener('change', (event) => {
     const target = event.target as HTMLInputElement
-    setState({ a: Number(target.value) })
+    dispatch({ type: ACTION_TYPE.SET_A, payload: { a: Number(target.value) } })
   })
 
   rootElement.querySelector('#stateB')!.addEventListener('change', (event) => {
     const target = event.target as HTMLInputElement
-    setState({ b: Number(target.value) })
+    dispatch({ type: ACTION_TYPE.SET_B, payload: { b: Number(target.value) } })
   })
 }
 
-observe(render)
+subscribe(render)
