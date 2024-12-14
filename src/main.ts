@@ -1,58 +1,52 @@
 type State = Record<string, any>
-type ObserverFn<T> = (data: T) => void
-
-class Store<TState extends State = State> {
-  private _state: TState
-  private observers: Set<ObserverFn<TState>>
-
-  constructor(state: TState) {
-    this._state = state
-    this.observers = new Set()
-  }
-
-  get state() {
-    return { ...this._state }
-  }
-
-  setState(newState: State) {
-    this._state = { ...this._state, ...newState }
-    this.notify()
-  }
-
-  subscribe(observer: ObserverFn<TState>) {
-    this.observers.add(observer)
-  }
-
-  notify() {
-    this.observers.forEach((observer) => observer(this._state))
-  }
-}
+type ObserverFn<T> = (...args: T[]) => void
 
 interface InitialState {
   a: number
   b: number
 }
 
-class Observer<TState extends State> {
-  private fn: ObserverFn<TState>
+function observable<TState extends State = State>(initialState: TState) {
+  Object.keys(initialState).forEach((key) => {
+    let _value = initialState[key]
+    const observers = new Set() as Set<ObserverFn<TState>>
 
-  constructor(fn: ObserverFn<TState>) {
-    this.fn = fn
-  }
+    Object.defineProperty(initialState, key, {
+      get() {
+        if (currentObserver) {
+          observers.add(currentObserver)
+        }
 
-  subscribe(store: Store<TState>) {
-    store.subscribe(this.fn)
-  }
+        return _value
+      },
+      set(value) {
+        _value = value
+        observers.forEach((observer) => observer())
+      },
+    })
+  })
+
+  return initialState
 }
 
-const store = new Store<InitialState>({ a: 10, b: 20 })
+let currentObserver: null | (() => void) = null
 
-const add = new Observer<InitialState>((data) => console.log(`a + b = ${data.a + data.b}`))
-const multiple = new Observer<InitialState>((data) => console.log(`a * b = ${data.a * data.b}`))
+function observer(fn: () => void) {
+  currentObserver = fn
+  fn()
+  currentObserver = null
+}
 
-add.subscribe(store)
-multiple.subscribe(store)
+// a를 읽을 때 a가 observers에 등록해야함.
 
-store.notify()
+const store = observable<InitialState>({ a: 10, b: 20 })
 
-store.setState({ a: 100, b: 200 })
+observer(() => console.log(`a = ${store.a}`))
+observer(() => console.log(`b = ${store.b}`))
+observer(() => console.log(`a + b = ${store.a} + ${store.b}`))
+observer(() => console.log(`a * b = ${store.a} + ${store.b}`))
+observer(() => console.log(`a - b = ${store.a} + ${store.b}`))
+
+store.a = 100
+
+store.b = 200
