@@ -32,7 +32,10 @@ export function createStore<State, Action extends ActionType>(reducer: Reducer<S
     const listenerId = currentListenerId++
     currentListeners.set(listenerId, listenerCallback)
     currentListeners.forEach((listener) => listener())
-    return () => {}
+
+    return () => {
+      currentListeners.delete(listenerId)
+    }
   }
 
   dispatch({ type: ActionTypes.INIT } as Action)
