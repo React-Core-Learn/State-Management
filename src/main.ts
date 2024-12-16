@@ -1,32 +1,14 @@
-import { observe, observable } from './core/observer';
+import { App } from './App';
 
-const state = observable({
-  a: 10,
-  b: 20,
-});
-
-const $app = document.querySelector('#app');
-
-const render = () => {
-  if ($app) {
-    $app.innerHTML = `
-    <p>a + b = ${state.a + state.b}</p>
-    <input id="stateA" type="number" value="${state.a}"/>
-    <input id="stateB" type="number" value="${state.b}"/>
-    `;
-
-    $app.querySelector('#stateA')?.addEventListener('input', ({ target }) => {
-      if (target && target instanceof HTMLInputElement) {
-        state.a = Number(target.value);
-      }
-    });
-
-    $app.querySelector('#stateB')?.addEventListener('input', ({ target }) => {
-      if (target && target instanceof HTMLInputElement) {
-        state.b = Number(target.value);
-      }
-    });
+class Main {
+  constructor() {
+    const $app: Element | null = document.querySelector('#app');
+    if ($app instanceof HTMLElement) {
+      new App($app, {});
+    } else {
+      console.error('Element with ID "app" not found.');
+    }
   }
-};
+}
 
-observe(render);
+new Main();
