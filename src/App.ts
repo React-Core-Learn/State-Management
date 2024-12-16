@@ -1,34 +1,39 @@
 import Component from './core/Component';
+import { store } from './store';
+
+const InputA = () => `
+<input id="stateA" type="number" value="${store.state.a}" size="5"/>
+`;
+
+const InputB = () => `
+<input id="stateB" type="number" value="${store.state.b}" size="5"/>
+`;
+
+const Calculator = () => `
+<p>a + b = ${store.state.a + store.state.b}</p>
+`;
 
 export class App extends Component {
-  initState() {
-    return {
-      a: 10,
-      b: 20,
-    };
-  }
-
   template(): string {
-    const { a, b } = this.state;
     return `
-    <input id="stateA" type="number" value="${a}"/>
-    <input id="stateB" type="number" value="${b}"/>
-    <p>a + b = ${a + b}</p>
+    ${InputA()}
+    ${InputB()}
+    ${Calculator()}
     `;
   }
 
   setEvent(): void {
-    const { $el, state } = this;
+    const { $el } = this;
 
-    $el.querySelector('#stateA')?.addEventListener('input', ({ target }) => {
+    $el.querySelector('#stateA')?.addEventListener('change', ({ target }) => {
       if (target && target instanceof HTMLInputElement) {
-        state.a = Number(target.value);
+        store.setState({ a: Number(target.value) });
       }
     });
 
-    $el.querySelector('#stateB')?.addEventListener('input', ({ target }) => {
+    $el.querySelector('#stateB')?.addEventListener('change', ({ target }) => {
       if (target && target instanceof HTMLInputElement) {
-        state.b = Number(target.value);
+        store.setState({ b: Number(target.value) });
       }
     });
   }

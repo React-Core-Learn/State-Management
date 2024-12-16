@@ -1,10 +1,9 @@
 import { observable, observe } from './observer';
 
-type TComponentData = Record<string, any>;
+export type TComponentData = Record<string, any>;
 
-interface IState {
-  a: number;
-  b: number;
+export interface IState {
+  [key: string]: number;
 }
 
 export default class Component<
